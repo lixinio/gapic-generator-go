@@ -124,7 +124,7 @@ func (g *generator) exampleMethodBody(pkgName, servName string, m *descriptorpb.
 
 	httpInfo := getHTTPInfo(m)
 
-	g.imports[inSpec] = true
+	inSpec = g.AddImport(&inSpec)
 	// Pick the first transport for simplicity. We don't need examples
 	// of each method for both transports when they have the same surface.
 	t := g.opts.transports[0]
@@ -224,6 +224,8 @@ func (g *generator) examplePagingCall(m *descriptorpb.MethodDescriptorProto) err
 		return err
 	}
 
+	outSpec = g.AddImport(&outSpec)
+
 	p := g.printf
 
 	p("it := c.%s(ctx, req)", m.GetName())
@@ -246,7 +248,6 @@ func (g *generator) examplePagingCall(m *descriptorpb.MethodDescriptorProto) err
 	p("}")
 
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/iterator"}] = true
-	g.imports[outSpec] = true
 	return nil
 }
 

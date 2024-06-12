@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package apis;
+
+import "lib1/v1/const.proto";
+import "lib2/v1/const.proto";
+
+option go_package = "go.example.com/apis;v1";
+
+// 门店服务
+service StoreService {
+  // get brand
+  rpc GetCarBrand(GetCarBrandRequest) returns (GetCarBrandResponse) {}
+  // ListCarBrands
+  rpc ListCarBrands(ListCarBrandsRequest) returns (ListCarBrandsResponse) {}
+  // ListCarModels
+  rpc ListCarModels(ListCarModelsRequest) returns (ListCarModelsResponse) {}
+}
+
+// GetCarBrandRequest
+message GetCarBrandRequest {
+  lib1.v1.WeixinServiceType tp = 1;
+}
+
+// GetCarBrandResponse
+message GetCarBrandResponse {}
+
+message ListCarBrandsRequest {
+  // 页大小
+  int32 page_size = 2;
+  // 页token
+  string page_token = 3;
+  // 过滤条件
+  string filter = 4;
+  // 排序条件
+  string order_by = 5;
+}
+
+message ListCarBrandsResponse {
+  // 关单价格修改记录
+  repeated lib1.v1.Brand brands = 1;
+  // 页token
+  string next_page_token = 2;
+  // 总大小
+  int64 total_size = 3;
+}
+
+message ListCarModelsRequest {
+  // 页大小
+  int32 page_size = 2;
+  // 页token
+  string page_token = 3;
+  // 过滤条件
+  string filter = 4;
+  // 排序条件
+  string order_by = 5;
+}
+
+message ListCarModelsResponse {
+  // 关单价格修改记录
+  repeated lib2.v1.Model models = 1;
+  // 页token
+  string next_page_token = 2;
+  // 总大小
+  int64 total_size = 3;
+}

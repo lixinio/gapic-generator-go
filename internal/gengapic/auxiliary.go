@@ -246,7 +246,7 @@ func (g *generator) genOperationWrapperType(ow operationWrapper) error {
 		if err != nil {
 			return err
 		}
-		g.imports[respSpec] = true
+		respSpec = g.AddImport(&respSpec)
 
 		respType = fmt.Sprintf("%s.%s", respSpec.Name, name)
 	}
@@ -256,7 +256,7 @@ func (g *generator) genOperationWrapperType(ow operationWrapper) error {
 	if err != nil {
 		return err
 	}
-	g.imports[meta] = true
+	meta = g.AddImport(&meta)
 	metaType := fmt.Sprintf("%s.%s", meta.Name, name)
 
 	// Operation wrapper type definition

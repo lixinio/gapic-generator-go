@@ -46,6 +46,8 @@ func (g *generator) iterTypeOf(elemField *descriptorpb.FieldDescriptorProto) (*i
 			return &iterType{}, err
 		}
 
+		imp = g.AddImport(&imp)
+
 		// Prepend parent Message name for nested Messages
 		// to match the generated Go type name.
 		typeName := g.nestedName(eType)
@@ -80,6 +82,8 @@ func (g *generator) iterTypeOf(elemField *descriptorpb.FieldDescriptorProto) (*i
 				if err != nil {
 					return nil, err
 				}
+
+				// imp = g.AddImport(&imp)
 
 				pt.mapValueTypeName = fmt.Sprintf("*%s.%s", imp.Name, n)
 				pt.elemTypeName = fmt.Sprintf("%sPair", n)
@@ -272,6 +276,9 @@ func (g *generator) pagingCall(servName string, m *descriptorpb.MethodDescriptor
 		return err
 	}
 
+	inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
+
 	max := "math.MaxInt32"
 	ps := "int32(pageSize)"
 	if isOptional(inType, "page_size") {
@@ -314,10 +321,9 @@ func (g *generator) pagingCall(servName string, m *descriptorpb.MethodDescriptor
 
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/protobuf/proto"}] = true
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/iterator"}] = true
-	g.imports[inSpec] = true
-	g.imports[outSpec] = true
+
 	for _, spec := range pt.elemImports {
-		g.imports[spec] = true
+		g.AddImport(&spec)
 	}
 	return nil
 }
@@ -386,6 +392,6 @@ func (g *generator) pagingIter(pt *iterType) {
 
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/iterator"}] = true
 	for _, spec := range pt.elemImports {
-		g.imports[spec] = true
+		g.AddImport(&spec)
 	}
 }

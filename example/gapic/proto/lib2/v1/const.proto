@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package apis.lib2.v1;
+
+option go_package = "go.example.com/apis/lib2/v1;v1";
+
+// car model
+message Model {
+    // name
+    string name = 1;
+    // id
+    int64 id = 2;
+}

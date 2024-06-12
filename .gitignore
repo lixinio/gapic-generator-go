@@ -9,6 +9,8 @@ gofmt.txt
 golint.txt
 govet.txt
 showcase/showcase_v1beta1.yaml
+vendor
+example/*/gen
 
 # Jetbrains
 .idea/
@@ -33,3 +35,4 @@ bazel-*
 # VS Code workspace
 *.code-workspace
 .vscode/
+protoc-gen-go_gapic
