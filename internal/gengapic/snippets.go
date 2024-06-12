@@ -86,7 +86,8 @@ func (g *generator) genAndCommitSnippets(s *descriptorpb.ServiceDescriptorProto)
 		if err := g.genSnippetFile(s, m); err != nil {
 			return err
 		}
-		g.imports[pbinfo.ImportSpec{Name: g.opts.pkgName, Path: g.opts.pkgPath}] = true
+		spec := pbinfo.ImportSpec{Name: g.opts.pkgName, Path: g.opts.pkgPath}
+		spec = g.AddImport(&spec)
 		// Use the client short name in this filepath.
 		// E.g. the client for LoggingServiceV2 is just "Client".
 		clientName := pbinfo.ReduceServName(s.GetName(), g.opts.pkgName) + "Client"

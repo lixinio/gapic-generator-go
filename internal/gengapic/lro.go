@@ -35,6 +35,9 @@ func (g *generator) lroCall(servName string, m *descriptorpb.MethodDescriptorPro
 		return err
 	}
 
+	inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
+
 	lroType := lroTypeName(m)
 	p := g.printf
 
@@ -63,8 +66,6 @@ func (g *generator) lroCall(servName string, m *descriptorpb.MethodDescriptorPro
 	p("")
 
 	g.imports[pbinfo.ImportSpec{Path: "cloud.google.com/go/longrunning"}] = true
-	g.imports[inSpec] = true
-	g.imports[outSpec] = true
 	return nil
 }
 

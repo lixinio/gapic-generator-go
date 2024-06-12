@@ -17,6 +17,8 @@ package gengapic
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -56,7 +58,9 @@ type generator struct {
 	// Comments to appear after the license header and before the package declaration.
 	headerComments printer.P
 
-	imports map[pbinfo.ImportSpec]bool
+	imports        map[pbinfo.ImportSpec]bool
+	dupAliasCheck  map[string]*pbinfo.ImportSpec
+	dupImportCheck map[string]*pbinfo.ImportSpec
 
 	// Human-readable name of the API used in docs
 	apiName string
@@ -101,6 +105,8 @@ func newGenerator(req *pluginpb.CodeGeneratorRequest) (*generator, error) {
 		mixins:           make(mixins),
 		comments:         map[protoiface.MessageV1]string{},
 		imports:          map[pbinfo.ImportSpec]bool{},
+		dupAliasCheck:    map[string]*pbinfo.ImportSpec{},
+		dupImportCheck:   map[string]*pbinfo.ImportSpec{},
 		customOpServices: map[*descriptorpb.ServiceDescriptorProto]*descriptorpb.ServiceDescriptorProto{},
 		aux: &auxTypes{
 			iters:           map[string]*iterType{},
@@ -281,6 +287,62 @@ func (g *generator) reset() {
 	g.headerComments.Reset()
 	for k := range g.imports {
 		delete(g.imports, k)
+	}
+	// for k := range g.dupAliasCheck {
+	// 	delete(g.dupAliasCheck, k)
+	// }
+	// for k := range g.dupImportCheck {
+	// 	delete(g.dupImportCheck, k)
+	// }
+}
+
+func (g *generator) AddImportStr(path string) pbinfo.ImportSpec {
+	return g.AddImport(&pbinfo.ImportSpec{Path: path})
+}
+
+func (g *generator) AddImport(spec *pbinfo.ImportSpec) pbinfo.ImportSpec {
+	existSpec, ok := g.dupImportCheck[spec.Path]
+	if ok {
+		// 已经存在
+		g.imports[*existSpec] = true
+		return *existSpec
+	}
+
+	g.dupImportCheck[spec.Path] = spec
+	name := spec.Name
+	if name == "" {
+		// 从path中获得alias
+		name := filepath.Base(spec.Path)
+
+		// eg. github.com/go-kratos/kratos/v2
+		versionPattern := regexp.MustCompile(`^v[0-9]+$`)
+		if versionPattern.MatchString(name) {
+			name = filepath.Base(filepath.Dir(spec.Path))
+		}
+
+		// eg. github.com/googleapis/gax-go
+		names := strings.Split(name, "-")
+		if len(names) > 1 {
+			name = names[0]
+		}
+	}
+
+	originName := name
+	idx := 1
+	for {
+		_, ok := g.dupAliasCheck[name]
+		if !ok {
+			g.dupAliasCheck[name] = spec
+			if idx > 1 {
+				// 有修改过 alias
+				spec.Name = name
+			}
+			g.imports[*spec] = true
+			return *spec
+		}
+
+		name = fmt.Sprintf("%s%d", originName, idx)
+		idx++
 	}
 }
 
