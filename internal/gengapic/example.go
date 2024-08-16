@@ -112,7 +112,7 @@ func (g *generator) exampleMethodBody(pkgName, servName string, m *descriptor.Me
 
 	httpInfo := getHTTPInfo(m)
 
-	g.imports[inSpec] = true
+	inSpec = g.AddImport(&inSpec)
 	// Pick the first transport for simplicity. We don't need examples
 	// of each method for both transports when they have the same surface.
 	t := g.opts.transports[0]

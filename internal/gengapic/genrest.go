@@ -598,7 +598,8 @@ func (g *generator) serverStreamRESTCall(servName string, s *descriptor.ServiceD
 	if err != nil {
 		return err
 	}
-	g.imports[inSpec] = true
+
+	inSpec = g.AddImport(&inSpec)
 
 	outType := g.descInfo.Type[m.GetOutputType()]
 
@@ -606,13 +607,14 @@ func (g *generator) serverStreamRESTCall(servName string, s *descriptor.ServiceD
 	if err != nil {
 		return err
 	}
-	g.imports[outSpec] = true
+
+	outSpec = g.AddImport(&outSpec)
 
 	servSpec, err := g.descInfo.ImportSpec(s)
 	if err != nil {
 		return err
 	}
-	g.imports[servSpec] = true
+	servSpec = g.AddImport(&servSpec)
 
 	p := g.printf
 	lowcaseServName := lowcaseRestClientName(servName)
@@ -754,7 +756,8 @@ func (g *generator) noRequestStreamRESTCall(servName string, s *descriptor.Servi
 	if err != nil {
 		return err
 	}
-	g.imports[servSpec] = true
+
+	servSpec = g.AddImport(&servSpec)
 
 	lowcaseServName := lowcaseRestClientName(servName)
 
@@ -786,6 +789,10 @@ func (g *generator) pagingRESTCall(servName string, m *descriptor.MethodDescript
 	if err != nil {
 		return err
 	}
+
+	inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
+
 	info := getHTTPInfo(m)
 	if err != nil {
 		return err
@@ -886,8 +893,6 @@ func (g *generator) pagingRESTCall(servName string, m *descriptor.MethodDescript
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/protobuf/proto"}] = true
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/protobuf/encoding/protojson"}] = true
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/googleapi"}] = true
-	g.imports[inSpec] = true
-	g.imports[outSpec] = true
 
 	return nil
 }
@@ -912,7 +917,8 @@ func (g *generator) lroRESTCall(servName string, m *descriptor.MethodDescriptorP
 	if err != nil {
 		return err
 	}
-	g.imports[outSpec] = true
+	// inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
 
 	opWrapperType := lroTypeName(m.GetName())
 	p("func (c *%s) %s(ctx context.Context, req *%s.%s, opts ...gax.CallOption) (*%s, error) {",
@@ -1020,6 +1026,8 @@ func (g *generator) emptyUnaryRESTCall(servName string, m *descriptor.MethodDesc
 		return err
 	}
 
+	// inSpec = g.AddImport(&inSpec)
+
 	p := g.printf
 	lowcaseServName := lowcaseRestClientName(servName)
 	p("func (c *%s) %s(ctx context.Context, req *%s.%s, opts ...gax.CallOption) error {",
@@ -1083,7 +1091,7 @@ func (g *generator) emptyUnaryRESTCall(servName string, m *descriptor.MethodDesc
 	p("}")
 
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/googleapi"}] = true
-	g.imports[inSpec] = true
+	// g.imports[inSpec] = true
 	return nil
 }
 
@@ -1104,6 +1112,10 @@ func (g *generator) unaryRESTCall(servName string, m *descriptor.MethodDescripto
 	if err != nil {
 		return err
 	}
+
+	inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
+
 	outFqn := fmt.Sprintf(".%s.%s", g.descInfo.ParentFile[outType].GetPackage(), outType.GetName())
 	isHTTPBodyMessage := outFqn == httpBodyType
 
@@ -1215,8 +1227,6 @@ func (g *generator) unaryRESTCall(servName string, m *descriptor.MethodDescripto
 
 	g.imports[pbinfo.ImportSpec{Path: "io/ioutil"}] = true
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/api/googleapi"}] = true
-	g.imports[inSpec] = true
-	g.imports[outSpec] = true
 	return nil
 }
 

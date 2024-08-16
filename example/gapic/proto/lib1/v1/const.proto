@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package apis.lib1.v1;
+
+option go_package = "go.example.com/apis/lib1/v1;v1";
+
+enum WeixinServiceType {
+    // 未知
+    WEIXIN_SERVICE_TYPE_UNSPECIFIED = 0;
+    // 订阅号
+    WEIXIN_SERVICE_TYPE_OA = 1;
+    // 由历史老帐号升级后的订阅号
+    WEIXIN_SERVICE_TYPE_OA2 = 2;
+    // 服务号
+    WEIXIN_SERVICE_TYPE_SVC_OA = 3;
+    // 小程序
+    WEIXIN_SERVICE_TYPE_MP = 4;
+}
+
+// 品牌
+message Brand {
+    // name
+    string name = 1;
+    // id
+    int64 id = 2;
+}

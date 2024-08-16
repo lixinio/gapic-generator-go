@@ -117,7 +117,9 @@ func Gen(genReq *plugin.CodeGeneratorRequest) (*plugin.CodeGeneratorResponse, er
 		if err := g.genExampleFile(s); err != nil {
 			return &g.resp, errors.E(err, "example: %s", s.GetName())
 		}
-		g.imports[pbinfo.ImportSpec{Name: g.opts.pkgName, Path: g.opts.pkgPath}] = true
+		spec := pbinfo.ImportSpec{Name: g.opts.pkgName, Path: g.opts.pkgPath}
+		g.AddImport(&spec)
+		// g.imports[spec] = true
 		g.commit(outFile+"_client_example_test.go", g.opts.pkgName+"_test")
 
 		// Replace original set of transports for the next service that may have
@@ -281,7 +283,8 @@ func (g *generator) getFormattedValue(m *descriptor.MethodDescriptorProto, field
 		if err != nil {
 			return "", err
 		}
-		g.imports[imp] = true
+		// g.imports[imp] = true
+		imp = g.AddImport(&imp)
 
 		// protobuf Go generates a mapping from number to string
 		// representation of an enum, in UPPER_SNAKE_CASE form. The map
@@ -571,6 +574,9 @@ func (g *generator) returnType(m *descriptor.MethodDescriptorProto) (string, err
 	if err != nil {
 		return "", err
 	}
+
+	outSpec = g.AddImport(&outSpec)
+
 	info := getHTTPInfo(m)
 
 	// Regular return type.

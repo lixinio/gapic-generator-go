@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -46,7 +48,9 @@ type generator struct {
 
 	resp plugin.CodeGeneratorResponse
 
-	imports map[pbinfo.ImportSpec]bool
+	imports        map[pbinfo.ImportSpec]bool
+	dupAliasCheck  map[string]*pbinfo.ImportSpec
+	dupImportCheck map[string]*pbinfo.ImportSpec
 
 	// Human-readable name of the API used in docs
 	apiName string
@@ -88,6 +92,8 @@ func (g *generator) init(req *plugin.CodeGeneratorRequest) error {
 	g.mixins = make(mixins)
 	g.comments = map[protoiface.MessageV1]string{}
 	g.imports = map[pbinfo.ImportSpec]bool{}
+	g.dupAliasCheck = map[string]*pbinfo.ImportSpec{}
+	g.dupImportCheck = map[string]*pbinfo.ImportSpec{}
 	g.customOpServices = map[*descriptor.ServiceDescriptorProto]*descriptor.ServiceDescriptorProto{}
 	g.aux = &auxTypes{
 		iters: map[string]*iterType{},
@@ -244,6 +250,56 @@ func (g *generator) reset() {
 	g.pt.Reset()
 	for k := range g.imports {
 		delete(g.imports, k)
+	}
+}
+
+func (g *generator) AddImportStr(path string) pbinfo.ImportSpec {
+	return g.AddImport(&pbinfo.ImportSpec{Path: path})
+}
+
+func (g *generator) AddImport(spec *pbinfo.ImportSpec) pbinfo.ImportSpec {
+	existSpec, ok := g.dupImportCheck[spec.Path]
+	if ok {
+		// 已经存在
+		g.imports[*existSpec] = true
+		return *existSpec
+	}
+
+	g.dupImportCheck[spec.Path] = spec
+	name := spec.Name
+	if name == "" {
+		// 从path中获得alias
+		name := filepath.Base(spec.Path)
+
+		// eg. github.com/go-kratos/kratos/v2
+		versionPattern := regexp.MustCompile(`^v[0-9]+$`)
+		if versionPattern.MatchString(name) {
+			name = filepath.Base(filepath.Dir(spec.Path))
+		}
+
+		// eg. github.com/googleapis/gax-go
+		names := strings.Split(name, "-")
+		if len(names) > 1 {
+			name = names[0]
+		}
+	}
+
+	originName := name
+	idx := 1
+	for {
+		_, ok := g.dupAliasCheck[name]
+		if !ok {
+			g.dupAliasCheck[name] = spec
+			if idx > 1 {
+				// 有修改过 alias
+				spec.Name = name
+			}
+			g.imports[*spec] = true
+			return *spec
+		}
+
+		name = fmt.Sprintf("%s%d", originName, idx)
+		idx++
 	}
 }
 

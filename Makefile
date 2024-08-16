@@ -24,6 +24,14 @@ install:
 	go install ./cmd/protoc-gen-go_gapic
 	go install ./cmd/protoc-gen-go_cli
 
+build:
+	go build ./cmd/protoc-gen-go_gapic
+
+.PHONY: build-linux
+build-linux:
+	mkdir -p build/linux
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/protoc-gen-go_gapic
+
 update-bazel-repos:
 	bazel run //:gazelle -- update-repos -from_file=go.mod -prune -to_macro=repositories.bzl%com_googleapis_gapic_generator_go_repositories
 	sed -i ''  "s/    \"go_repository\",//g" repositories.bzl

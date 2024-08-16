@@ -61,6 +61,8 @@ func (g *generator) customOpPointerType() (string, error) {
 		return "", err
 	}
 
+	// imp = g.AddImport(&imp)
+
 	s := fmt.Sprintf("*%s.%s", imp.Name, opName)
 
 	return s, nil
@@ -124,7 +126,8 @@ func (g *generator) customOperationType() error {
 	if err != nil {
 		return err
 	}
-	g.imports[opImp] = true
+
+	opImp = g.AddImport(&opImp)
 
 	statusField := operationField(op.message, extendedops.OperationResponseMapping_STATUS)
 	if statusField == nil {
@@ -300,6 +303,8 @@ func (g *generator) customOpStatusEnumDone() string {
 	// Ignore the error here, it would failed much earlier if the
 	// operation type was unresolvable.
 	_, imp, _ := g.descInfo.NameSpec(op)
+
+	// imp = g.AddImport(&imp)
 
 	// Ignore the nil case here, it would failed earlier if the
 	// status field was not present.

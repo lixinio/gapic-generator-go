@@ -24,7 +24,7 @@ func (g *generator) noRequestStreamCall(servName string, s *descriptor.ServiceDe
 	if err != nil {
 		return err
 	}
-	g.imports[servSpec] = true
+	servSpec = g.AddImport(&servSpec)
 
 	// We DON'T want to export the transport layers.
 	lowcaseServName := lowerFirst(servName + "GRPCClient")
@@ -57,13 +57,13 @@ func (g *generator) serverStreamCall(servName string, s *descriptor.ServiceDescr
 	if err != nil {
 		return err
 	}
-	g.imports[inSpec] = true
+	inSpec = g.AddImport(&inSpec)
 
 	servSpec, err := g.descInfo.ImportSpec(s)
 	if err != nil {
 		return err
 	}
-	g.imports[servSpec] = true
+	servSpec = g.AddImport(&servSpec)
 
 	p := g.printf
 	lowcaseServName := lowerFirst(servName + "GRPCClient")

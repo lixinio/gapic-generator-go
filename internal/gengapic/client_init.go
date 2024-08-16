@@ -89,6 +89,8 @@ func (g *generator) internalClientIntfInit(serv *descriptor.ServiceDescriptorPro
 		if err != nil {
 			return err
 		}
+
+		inSpec = g.AddImport(&inSpec)
 		if m.GetOutputType() == emptyType {
 			p("%s(context.Context, *%s.%s, ...gax.CallOption) error",
 				m.GetName(),
@@ -241,6 +243,8 @@ func (g *generator) genClientWrapperMethod(m *descriptor.MethodDescriptorProto, 
 		return err
 	}
 
+	// inSpec = g.AddImport(&inSpec)
+
 	// Generate method documentation just before any method is generated.
 	g.methodDoc(m)
 
@@ -337,6 +341,8 @@ func (g *generator) makeClients(serv *descriptor.ServiceDescriptorProto, servNam
 	if err != nil {
 		return err
 	}
+
+	// imp = g.AddImport(&imp)
 
 	err = g.internalClientIntfInit(serv, servName)
 	if err != nil {

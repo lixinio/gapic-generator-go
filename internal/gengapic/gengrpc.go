@@ -96,6 +96,9 @@ func (g *generator) unaryGRPCCall(servName string, m *descriptor.MethodDescripto
 		return err
 	}
 
+	inSpec = g.AddImport(&inSpec)
+	outSpec = g.AddImport(&outSpec)
+
 	p := g.printf
 
 	lowcaseServName := lowcaseGRPCClientName(servName)
@@ -122,9 +125,6 @@ func (g *generator) unaryGRPCCall(servName string, m *descriptor.MethodDescripto
 	p("}")
 	p("")
 
-	g.imports[inSpec] = true
-	g.imports[outSpec] = true
-
 	return nil
 }
 
@@ -137,6 +137,8 @@ func (g *generator) emptyUnaryGRPCCall(servName string, m *descriptor.MethodDesc
 	if err != nil {
 		return err
 	}
+
+	inSpec = g.AddImport(&inSpec)
 
 	p := g.printf
 
@@ -159,7 +161,6 @@ func (g *generator) emptyUnaryGRPCCall(servName string, m *descriptor.MethodDesc
 	p("}")
 	p("")
 
-	g.imports[inSpec] = true
 	return nil
 }
 
@@ -258,6 +259,8 @@ func (g *generator) grpcCallOptions(serv *descriptor.ServiceDescriptorProto, ser
 func (g *generator) grpcClientInit(serv *descriptor.ServiceDescriptorProto, servName string, imp pbinfo.ImportSpec, hasRPCForLRO bool) {
 	p := g.printf
 
+	imp = g.AddImport(&imp)
+
 	// We DON'T want to export the transport layers.
 	lowcaseServName := lowcaseGRPCClientName(servName)
 
@@ -300,7 +303,6 @@ func (g *generator) grpcClientInit(serv *descriptor.ServiceDescriptorProto, serv
 
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/grpc"}] = true
 	g.imports[pbinfo.ImportSpec{Path: "google.golang.org/grpc/metadata"}] = true
-	g.imports[imp] = true
 
 	g.grpcClientUtilities(serv, servName, imp, hasRPCForLRO)
 }
