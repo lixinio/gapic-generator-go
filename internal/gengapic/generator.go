@@ -256,6 +256,13 @@ func (g *generator) commit(fileName, pkgName string) int {
 	}
 	header.WriteString(")\n\n")
 	lineCount := len(strings.Split(header.String(), "\n"))
+
+	for _, imp := range imps {
+		if imp.Path == "net/url" {
+			header.WriteString("type _ url.Values\n\n")
+		}
+	}
+
 	g.resp.File = append(g.resp.File, &pluginpb.CodeGeneratorResponse_File{
 		Name:    &fileName,
 		Content: proto.String(header.String()),
